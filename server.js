@@ -23,35 +23,31 @@ if (!fs.existsSync(uploadDir)){
 const storage = multer.diskStorage({
     destination: './uploads/',
     filename: function(req, file, cb){
-        cb(null, 'post_' + Date.now() + path.extname(file.originalname));
+        cb(null, 'profile_' + Date.now() + path.extname(file.originalname));
     }
 });
 const upload = multer({ storage: storage });
 
-// --- SINGLE USER WITH POSTS ---
+// --- SINGLE USER DATA ---
 let user = {
-    username: "myaccount",
+    username: "admin",
     password: "1234",
     photo: null,
-    bio: "Welcome to my profile 📸"
+    message: "Welcome to my page!"
 };
-
-let posts = []; // Array to store posts with messages
 
 // --- ROUTES ---
 
-// 1. Login Route
+// 1. Login
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     if (username === user.username && password === user.password) {
         res.json({ 
             success: true, 
-            message: "Login successful",
-            username: user.username,            photo: user.photo,
-            bio: user.bio,
-            posts: posts
-        });
-    } else {
+            username: user.username,
+            photo: user.photo,
+            message: user.message
+        });    } else {
         res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 });
@@ -61,110 +57,78 @@ app.get('/user', (req, res) => {
     res.json({
         username: user.username,
         photo: user.photo,
-        bio: user.bio,
-        posts: posts
+        message: user.message
     });
 });
 
-// 3. Update Profile Info
-app.post('/update-profile', upload.single('photo'), (req, res) => {
-    const { username, password, bio } = req.body;
+// 3. Update Username & Password
+app.post('/update-credentials', (req, res) => {
+    const { username, password, newUsername, newPassword } = req.body;
     
-    if (username) user.username = username;
-    if (password) user.password = password;
-    if (bio) user.bio = bio;
-    
-    if (req.file) {
-        if (user.photo) {
-            try {
-                fs.unlinkSync(`./uploads/${user.photo}`);
-            } catch(e) {}
-        }
-        user.photo = req.file.filename;
+    // Verify current password
+    if (password !== user.password) {
+        return res.status(401).json({ success: false, message: "Current password is incorrect" });
     }
+    
+    if (newUsername) user.username = newUsername;
+    if (newPassword) user.password = newPassword;
     
     res.json({ 
         success: true, 
-        message: "Profile updated!",
-        username: user.username,
-        photo: user.photo,
-        bio: user.bio
+        message: "Credentials updated!",
+        username: user.username
     });
 });
 
-// 4. Create New Post with Message
-app.post('/create-post', upload.single('photo'), (req, res) => {
+// 4. Upload/Update Photo
+app.post('/upload-photo', upload.single('photo'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: "No photo uploaded" });
+    }
+    
+    // Delete old photo if exists
+    if (user.photo) {
+        try {
+            fs.unlinkSync(`./uploads/${user.photo}`);
+        } catch(e) {}
+    }
+    
+    user.photo = req.file.filename;
+    
+    res.json({ 
+        success: true,         message: "Photo uploaded!",
+        photo: user.photo
+    });
+});
+
+// 5. Delete Photo
+app.delete('/delete-photo', (req, res) => {
+    if (user.photo) {
+        try {
+            fs.unlinkSync(`./uploads/${user.photo}`);
+        } catch(e) {}
+        user.photo = null;
+    }
+    
+    res.json({ success: true, message: "Photo deleted!" });
+});
+
+// 6. Update Message
+app.post('/update-message', (req, res) => {
     const { message } = req.body;
-    
-    if (!req.file) {        return res.status(400).json({ success: false, message: "Photo is required" });
-    }
-    
-    const newPost = {
-        id: Date.now(),
-        photo: req.file.filename,
-        message: message || '',
-        likes: 0,
-        createdAt: new Date().toISOString()
-    };
-    
-    posts.unshift(newPost); // Add to beginning of array
+    user.message = message || '';
     
     res.json({ 
         success: true, 
-        message: "Post created!",
-        post: newPost
+        message: "Message updated!",
+        message: user.message
     });
 });
 
-// 5. Update Post Message
-app.put('/post/:id', (req, res) => {
-    const { id } = req.params;
-    const { message } = req.body;
-    
-    const post = posts.find(p => p.id == id);
-    if (!post) {
-        return res.status(404).json({ success: false, message: "Post not found" });
-    }
-    
-    post.message = message;
-    
-    res.json({ 
-        success: true, 
-        message: "Post updated!",
-        post: post
-    });
-});
-
-// 6. Delete Post
-app.delete('/post/:id', (req, res) => {
-    const { id } = req.params;
-    
-    const postIndex = posts.findIndex(p => p.id == id);
-    if (postIndex === -1) {
-        return res.status(404).json({ success: false, message: "Post not found" });
-    }
-    
-    // Delete photo file
-    try {        fs.unlinkSync(`./uploads/${posts[postIndex].photo}`);
-    } catch(e) {}
-    
-    posts.splice(postIndex, 1);
-    
-    res.json({ success: true, message: "Post deleted" });
-});
-
-// 7. Like Post
-app.post('/post/:id/like', (req, res) => {
-    const { id } = req.params;
-    
-    const post = posts.find(p => p.id == id);
-    if (!post) {
-        return res.status(404).json({ success: false, message: "Post not found" });
-    }
-    
-    post.likes = (post.likes || 0) + 1;
-    
-    res.json({ success: true, likes: post.likes });
+// 7. Delete Message
+app.delete('/delete-message', (req, res) => {
+    user.message = '';
+    res.json({ success: true, message: "Message deleted!" });
 });
 
 // Start Server
