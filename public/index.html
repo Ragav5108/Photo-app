@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-hover: #1D4ED8;
+            --danger: #DC2626;
+            --danger-hover: #B91C1C;
+            --success: #16A34A;
+            --bg: #F3F4F6;
+            --card: #FFFFFF;
+            --border: #E5E7EB;
+            --text: #1F2937;
+            --text-light: #6B7280;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 24px;            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+
+        /* Content */
+        .content {
+            padding: 24px;
+        }
+
+        /* Login Form */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group textarea {            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-msg {
+            color: var(--danger);            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+
+        .success-msg {
+            color: var(--success);
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .success-msg.show {
+            display: block;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            display: none;
+        }
+
+        .profile-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .profile-photo-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg);
+            border: 2px solid var(--border);
+        }
+
+        .profile-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .profile-photo-placeholder {            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 48px;
+        }
+
+        .profile-username {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .profile-message {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-top: 8px;
+            min-height: 20px;
+        }
+
+        .profile-message.empty {
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .content {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>👤 My Profile</h1>
+            <p>Manage your photo, message & credentials</p>
+        </div>
+
+        <div class="content">
+            <!-- Login Section -->
+            <div id="login-section">
+                <p class="error-msg" id="login-error"></p>
+                
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" placeholder="Enter username">
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="Enter password">
+                </div>
+                
+                <button class="btn btn-primary" id="login-btn" onclick="login()">Login</button>
+                
+                <p style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-light);">
+                    Default: <strong>admin</strong> / <strong>1234</strong>
+                </p>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile-section" class="profile-section">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-photo-container">
+                        <img id="profile-photo" class="profile-photo" src="" alt="Profile">
+                        <div id="profile-photo-placeholder" class="profile-photo-placeholder">👤</div>
+                    </div>
+                    <h2 class="profile-username" id="display-username">admin</h2>
+                    <p class="profile-message empty" id="display-message">No message</p>
+                </div>
+
+                <!-- Photo Section -->
+                <div class="section">
+                    <div class="section-title">📷 Photo</div>
+                    
+                    <div class="file-input-wrapper">
+                        <button class="btn btn-secondary">Choose Photo</button>
+                        <input type="file" id="photo-input" accept="image/*" onchange="uploadPhoto()">
+                    </div>                    
+                    <div class="btn-group">
+                        <button class="btn btn-danger" onclick="deletePhoto()" id="delete-photo-btn">Delete Photo</button>
+                    </div>
+                    
+                    <p class="success-msg" id="photo-success"></p>
+                    <p class="error-msg" id="photo-error"></p>
+                </div>
+
+                <!-- Message Section -->
+                <div class="section">
+                    <div class="section-title">💬 Message</div>
+                    
+                    <div class="form-group">
+                        <textarea id="message-input" placeholder="Write your message..."></textarea>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="updateMessage()" id="update-message-btn">Update Message</button>
+                        <button class="btn btn-danger" onclick="deleteMessage()" id="delete-message-btn">Delete Message</button>
+                    </div>
+                    
+                    <p class="success-msg" id="message-success"></p>
+                </div>
+
+                <!-- Credentials Section -->
+                <div class="section">
+                    <div class="section-title">🔐 Username & Password</div>
+                    
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="current-password" placeholder="Enter current password">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>New Username (optional)</label>
+                        <input type="text" id="new-username" placeholder="Enter new username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>New Password (optional)</label>
+                        <input type="password" id="new-password" placeholder="Enter new password">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="updateCredentials()" id="update-credentials-btn">Update Credentials</button>
+                    
+                    <p class="success-msg" id="credentials-success"></p>
+                    <p class="error-msg" id="credentials-error"></p>
+                </div>
+                <!-- Logout -->
+                <button class="btn btn-secondary" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Show Message Helper
+        function showMessage(id, text, type) {
+            const el = document.getElementById(id);
+            el.className = `${type}-msg show`;
+            el.innerText = text;
+            setTimeout(() => {
+                el.className = `${type}-msg`;
+                el.innerText = '';
+            }, 3000);
+        }
+
+        // Login
+        async function login() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('login-btn');
+
+            if (!username || !password) {
+                showMessage('login-error', 'Please fill in all fields', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Logging in...';
+
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUser = data;
+                    showProfile();
+                } else {
+                    showMessage('login-error', data.message, 'error');
+                }
+            } catch (err) {
+                showMessage('login-error', 'Connection error', 'error');            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Login';
+            }
+        }
+
+        // Show Profile
+        function showProfile() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('profile-section').style.display = 'block';
+            
+            document.getElementById('display-username').innerText = currentUser.username;
+            
+            // Photo
+            const photo = document.getElementById('profile-photo');
+            const placeholder = document.getElementById('profile-photo-placeholder');
+            const deleteBtn = document.getElementById('delete-photo-btn');
+            
+            if (currentUser.photo) {
+                photo.src = '/uploads/' + currentUser.photo + '?t=' + new Date().getTime();
+                photo.style.display = 'block';
+                placeholder.style.display = 'none';
+                deleteBtn.disabled = false;
+            } else {
+                photo.style.display = 'none';
+                placeholder.style.display = 'flex';
+                deleteBtn.disabled = true;
+            }
+            
+            // Message
+            const messageEl = document.getElementById('display-message');
+            if (currentUser.message) {
+                messageEl.innerText = currentUser.message;
+                messageEl.classList.remove('empty');
+            } else {
+                messageEl.innerText = 'No message';
+                messageEl.classList.add('empty');
+            }
+            
+            document.getElementById('message-input').value = currentUser.message || '';
+        }
+
+        // Logout
+        function logout() {
+            if (!confirm('Logout?')) return;
+            
+            currentUser = null;
+            document.getElementById('profile-section').style.display = 'none';
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('login-username').value = '';            document.getElementById('login-password').value = '';
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-username').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('message-input').value = '';
+        }
+
+        // Upload Photo
+        async function uploadPhoto() {
+            const file = document.getElementById('photo-input').files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('photo', file);
+
+            const btn = document.getElementById('photo-input').parentElement.querySelector('button');
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/upload-photo', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUser.photo = data.photo;
+                    showProfile();
+                    showMessage('photo-success', 'Photo uploaded!', 'success');
+                } else {
+                    showMessage('photo-error', data.message, 'error');
+                }
+            } catch (err) {
+                showMessage('photo-error', 'Connection error', 'error');
+            } finally {
+                btn.disabled = false;
+                document.getElementById('photo-input').value = '';
+            }
+        }
+
+        // Delete Photo
+        async function deletePhoto() {
+            if (!confirm('Delete photo?')) return;
+
+            try {
+                const res = await fetch('/delete-photo', { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUser.photo = null;                    showProfile();
+                    showMessage('photo-success', 'Photo deleted!', 'success');
+                }
+            } catch (err) {
+                showMessage('photo-error', 'Connection error', 'error');
+            }
+        }
+
+        // Update Message
+        async function updateMessage() {
+            const message = document.getElementById('message-input').value.trim();
+            const btn = document.getElementById('update-message-btn');
+
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/update-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUser.message = data.message;
+                    showProfile();
+                    showMessage('message-success', 'Message updated!', 'success');
+                }
+            } catch (err) {
+                showMessage('message-success', 'Connection error', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Delete Message
+        async function deleteMessage() {
+            if (!confirm('Delete message?')) return;
+
+            try {
+                const res = await fetch('/delete-message', { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUser.message = '';
+                    document.getElementById('message-input').value = '';
+                    showProfile();
+                    showMessage('message-success', 'Message deleted!', 'success');
+                }
+            } catch (err) {                showMessage('message-success', 'Connection error', 'error');
+            }
+        }
+
+        // Update Credentials
+        async function updateCredentials() {
+            const currentPassword = document.getElementById('current-password').value;
+            const newUsername = document.getElementById('new-username').value.trim();
+            const newPassword = document.getElementById('new-password').value;
+            const btn = document.getElementById('update-credentials-btn');
+
+            if (!currentPassword) {
+                showMessage('credentials-error', 'Current password is required', 'error');
+                return;
+            }
+
+            if (!newUsername && !newPassword) {
+                showMessage('credentials-error', 'Enter new username or password', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/update-credentials', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: currentUser.username,
+                        password: currentPassword,
+                        newUsername: newUsername,
+                        newPassword: newPassword
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUser.username = data.username;
+                    if (newPassword) currentUser.password = newPassword;
+                    
+                    document.getElementById('current-password').value = '';
+                    document.getElementById('new-username').value = '';
+                    document.getElementById('new-password').value = '';
+                    
+                    showProfile();
+                    showMessage('credentials-success', 'Credentials updated!', 'success');
+                } else {
+                    showMessage('credentials-error', data.message, 'error');
+                }
+            } catch (err) {                showMessage('credentials-error', 'Connection error', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        // Enter key for login
+        document.getElementById('login-password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') login();
+        });
+    </script>
+</body>
+</html>
