@@ -3,528 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhotoVault - User Management</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Multi-User Photo App</title>
     <style>
-        :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --secondary: #6B7280;
-            --success: #10B981;
-            --danger: #EF4444;
-            --background: #F3F4F6;
-            --surface: #FFFFFF;
-            --text-primary: #111827;
-            --text-secondary: #6B7280;
-            --border: #E5E7EB;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --radius: 12px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: var(--surface);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            width: 100%;
-            max-width: 480px;
-            overflow: hidden;
-        }
-
-        /* Header */        .header {
-            background: linear-gradient(135deg, var(--primary) 0%, #7C3AED 100%);
-            padding: 30px 24px;
-            text-align: center;
-            color: white;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 300;
-        }
-
-        /* Content */
-        .content {
-            padding: 24px;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            background: var(--background);
-            border-radius: 8px;
-            padding: 4px;
-            margin-bottom: 24px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-        }
-
-        .tab:hover {
-            color: var(--text-primary);
-        }
-
-        .tab.active {            background: var(--surface);
-            color: var(--primary);
-            box-shadow: var(--shadow);
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            background: var(--surface);
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .form-group input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        /* Buttons */
-        .btn {
-            width: 100%;
-            padding: 14px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .btn-secondary {
-            background: var(--background);
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--border);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #DC2626;
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Messages */
-        .message {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 16px;
-            display: none;
-        }
-        .message.error {
-            background: #FEF2F2;
-            color: var(--danger);
-            border: 1px solid #FECACA;
-            display: block;
-        }
-
-        .message.success {
-            background: #ECFDF5;
-            color: var(--success);
-            border: 1px solid #A7F3D0;
-            display: block;
-        }
-
-        /* Photo Preview */
-        .photo-container {
-            margin-bottom: 20px;
-        }
-
-        .photo-preview {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 2px dashed var(--border);
-            display: none;
-            background: var(--background);
-        }
-
-        .photo-placeholder {
-            width: 100%;
-            height: 200px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--background);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
-        .photo-placeholder svg {
-            width: 48px;
-            height: 48px;
-            margin-bottom: 12px;
-            opacity: 0.5;
-        }
-
-        /* User List */        .user-list-container {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border);
-        }
-
-        .user-list-container h3 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-        }
-
-        .user-list {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--surface);
-        }
-
-        .user-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-            transition: background 0.2s ease;
-        }
-
-        .user-item:last-child {
-            border-bottom: none;
-        }
-
-        .user-item:hover {
-            background: var(--background);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, #7C3AED 100%);
-            display: flex;            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 12px;
-        }
-
-        .user-name {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-
-        .user-badge {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 12px;
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
-            width: auto;
-        }
-
-        /* Welcome Section */
-        .welcome-section {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 16px;
-            background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
-            border-radius: 8px;
-            border: 1px solid #BAE6FD;
-        }
-
-        .welcome-section h2 {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .welcome-section p {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .welcome-section strong {            color: var(--primary);
-        }
-
-        /* Hidden */
-        .hidden {
-            display: none !important;
-        }
-
-        /* Loading Spinner */
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ffffff;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Scrollbar */
-        .user-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .user-list::-webkit-scrollbar-track {
-            background: var(--background);
-            border-radius: 3px;
-        }
-
-        .user-list::-webkit-scrollbar-thumb {
-            background: var(--secondary);
-            border-radius: 3px;
-        }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            .header {
-                padding: 24px 20px;
-            }
-            
-            .content {
-                padding: 20px;
-            }        }
+        body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 400px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px 0; }
+        button:hover { background: #0056b3; }
+        button.secondary { background: #6c757d; }
+        button.secondary:hover { background: #545b62; }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        .hidden { display: none; }
+        #photo-preview { width: 100%; height: 200px; object-fit: cover; background: #eee; margin-bottom: 10px; display: none; border-radius: 4px; }
+        .error { color: red; font-size: 0.9em; text-align: center; }
+        .success { color: green; font-size: 0.9em; text-align: center; }
+        .user-list { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        .user-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #eee; }
+        .user-item:last-child { border-bottom: none; }
+        h2 { text-align: center; color: #333; }
+        .tabs { display: flex; margin-bottom: 15px; }
+        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border: 1px solid #ddd; }
+        .tab.active { background: #007bff; color: white; }
+        .welcome { text-align: center; color: #666; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>📸 PhotoVault</h1>
-            <p>Secure User Photo Management</p>
-        </div>
-
-        <div class="content">
-            <!-- AUTH SECTION -->
-            <div id="auth-section">
-                <!-- Tabs -->
-                <div class="tabs">
-                    <div class="tab active" onclick="showTab('login')">Sign In</div>
-                    <div class="tab" onclick="showTab('register')">Create Account</div>
-                </div>
-                
-                <!-- Login Form -->
-                <div id="login-form">
-                    <div id="login-message" class="message"></div>
-                    
-                    <div class="form-group">
-                        <label for="login-user">Username</label>
-                        <input type="text" id="login-user" placeholder="Enter your username" autocomplete="username">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="login-pass">Password</label>
-                        <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password">
-                    </div>
-                    
-                    <button class="btn btn-primary" onclick="login()" id="login-btn">
-                        <span>Sign In</span>
-                    </button>
-                </div>
-                
-                <!-- Register Form -->
-                <div id="register-form" class="hidden">
-                    <div id="register-message" class="message"></div>
-                    
-                    <div class="form-group">
-                        <label for="reg-user">Choose Username</label>
-                        <input type="text" id="reg-user" placeholder="Create a unique username" autocomplete="username">
-                    </div>
-                    
-                    <div class="form-group">                        <label for="reg-pass">Choose Password</label>
-                        <input type="password" id="reg-pass" placeholder="Create a strong password" autocomplete="new-password">
-                    </div>
-                    
-                    <button class="btn btn-primary" onclick="register()" id="register-btn">
-                        <span>Create Account</span>
-                    </button>
-                </div>
-                
-                <!-- User List -->
-                <div class="user-list-container">
-                    <h3>👥 Registered Users</h3>
-                    <div class="user-list" id="user-list">
-                        <div class="user-item">
-                            <div class="user-info">
-                                <span style="color: var(--text-secondary); font-size: 13px;">Loading users...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DASHBOARD -->
-            <div id="dashboard-section" class="hidden">
-                <!-- Welcome -->
-                <div class="welcome-section">
-                    <h2>Welcome back!</h2>
-                    <p>Logged in as <strong id="current-username"></strong></p>
-                </div>
-                
-                <!-- Photo -->
-                <div class="photo-container">
-                    <div id="photo-placeholder" class="photo-placeholder">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <polyline points="21 15 16 10 5 21"/>
-                        </svg>
-                        <span>No photo uploaded</span>
-                    </div>
-                    <img id="photo-preview" class="photo-preview" src="" alt="Profile Photo">
-                </div>
-                
-                <!-- Update Form -->
-                <form id="update-form">
-                    <div class="form-group">
-                        <label for="new-username">New Username (optional)</label>
-                        <input type="text" id="new-username" placeholder="Leave blank to keep current">
-                    </div>
-                                        <div class="form-group">
-                        <label for="new-password">New Password (optional)</label>
-                        <input type="password" id="new-password" placeholder="Leave blank to keep current">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="new-photo">Upload Photo</label>
-                        <input type="file" id="new-photo" accept="image/*">
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary" id="update-btn">
-                        <span>💾 Save Changes</span>
-                    </button>
-                    
-                    <button type="button" class="btn btn-secondary" onclick="viewAllUsers()" style="margin-top: 8px;">
-                        <span>👥 View All Users</span>
-                    </button>
-                    
-                    <button type="button" class="btn btn-danger" onclick="logout()" style="margin-top: 8px;">
-                        <span>🚪 Sign Out</span>
-                    </button>
-                </form>
+        <!-- LOGIN/REGISTER SECTION -->
+        <div id="auth-section">
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('login')">Login</div>
+                <div class="tab" onclick="showTab('register')">Register</div>
             </div>
             
-            <!-- All Users View -->
-            <div id="all-users-section" class="hidden">
-                <div class="welcome-section" style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);">
-                    <h2>All Users</h2>
-                    <p>Manage user accounts</p>
-                </div>
-                
-                <div class="user-list" id="all-user-list" style="max-height: 350px; margin-bottom: 16px;"></div>
-                
-                <button class="btn btn-secondary" onclick="backToDashboard()">
-                    <span>← Back to Dashboard</span>
-                </button>
+            <!-- Login Form -->
+            <div id="login-form">
+                <h2>Login</h2>
+                <p class="error" id="login-error"></p>
+                <input type="text" id="login-user" placeholder="Username">
+                <input type="password" id="login-pass" placeholder="Password">
+                <button onclick="login()">Login</button>
             </div>
+            
+            <!-- Register Form -->            <div id="register-form" class="hidden">
+                <h2>Create Account</h2>
+                <p class="error" id="register-error"></p>
+                <p class="success" id="register-success"></p>
+                <input type="text" id="reg-user" placeholder="Choose Username">
+                <input type="password" id="reg-pass" placeholder="Choose Password">
+                <button onclick="register()">Create Account</button>
+            </div>
+            
+            <!-- User List -->
+            <div style="margin-top: 20px;">
+                <h3>Existing Users:</h3>
+                <div class="user-list" id="user-list">Loading...</div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard-section" class="hidden">
+            <h2>My Profile</h2>
+            <p class="welcome">Welcome, <strong id="current-username"></strong>!</p>
+            
+            <img id="photo-preview" src="" alt="Profile Photo">
+            
+            <form id="update-form">
+                <input type="text" id="new-username" placeholder="New Username (optional)">
+                <input type="password" id="new-password" placeholder="New Password (optional)">
+                <label for="new-photo" style="font-size: 0.9em; color: #666;">Update Photo:</label>
+                <input type="file" id="new-photo" accept="image/*">
+                <button type="submit">Save Changes</button>
+                <button type="button" class="secondary" onclick="viewAllUsers()">View All Users</button>
+                <button type="button" class="danger" onclick="logout()">Logout</button>
+            </form>
+        </div>
+        
+        <!-- All Users View -->
+        <div id="all-users-section" class="hidden">
+            <h2>All Users</h2>
+            <div class="user-list" id="all-user-list" style="max-height: 300px;"></div>
+            <button class="secondary" onclick="backToDashboard()">Back to Dashboard</button>
         </div>
     </div>
 
@@ -534,8 +95,6 @@
         // Tab Switching
         function showTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            hideMessages();
-            
             if (tab === 'login') {
                 document.querySelector('.tab:nth-child(1)').classList.add('active');                document.getElementById('login-form').classList.remove('hidden');
                 document.getElementById('register-form').classList.add('hidden');
@@ -547,73 +106,26 @@
             loadUserList();
         }
 
-        // Hide Messages
-        function hideMessages() {
-            document.querySelectorAll('.message').forEach(m => {
-                m.className = 'message';
-                m.innerText = '';
-            });
-        }
-
-        // Show Message
-        function showMessage(elementId, message, type) {
-            const el = document.getElementById(elementId);
-            el.className = `message ${type}`;
-            el.innerText = message;
-            setTimeout(() => {
-                el.className = 'message';
-                el.innerText = '';
-            }, 5000);
-        }
-
-        // Set Loading State
-        function setLoading(btnId, loading) {
-            const btn = document.getElementById(btnId);
-            if (loading) {
-                btn.disabled = true;
-                btn.innerHTML = '<div class="spinner"></div>';
-            } else {
-                btn.disabled = false;
-            }
-        }
-
         // Load User List
         async function loadUserList() {
             try {
                 const res = await fetch('/users');
                 const users = await res.json();
                 const listDiv = document.getElementById('user-list');
-                
-                if (users.length === 0) {
-                    listDiv.innerHTML = '<div class="user-item"><div class="user-info"><span style="color: var(--text-secondary); font-size: 13px;">No users yet</span></div></div>';
-                    return;                }
-                
-                listDiv.innerHTML = users.map(u => {
-                    const initial = u.username.charAt(0).toUpperCase();
-                    return `<div class="user-item">
-                        <div class="user-info">
-                            <div class="user-avatar">${initial}</div>
-                            <span class="user-name">${u.username}</span>
-                            ${u.hasPhoto ? '<span class="user-badge">📷</span>' : ''}
-                        </div>
-                    </div>`;
-                }).join('');
+                listDiv.innerHTML = users.map(u => 
+                    `<div class="user-item">
+                        <span>${u.username} ${u.hasPhoto ? '📷' : ''}</span>
+                    </div>`
+                ).join('');
             } catch (err) {
-                document.getElementById('user-list').innerHTML = '<div class="user-item"><div class="user-info"><span style="color: var(--danger); font-size: 13px;">Error loading users</span></div></div>';
+                document.getElementById('user-list').innerText = 'Error loading users';
             }
         }
 
         // Login
         async function login() {
-            const username = document.getElementById('login-user').value.trim();
+            const username = document.getElementById('login-user').value;
             const password = document.getElementById('login-pass').value;
-
-            if (!username || !password) {
-                showMessage('login-message', 'Please fill in all fields', 'error');
-                return;
-            }
-
-            setLoading('login-btn', true);
 
             try {
                 const res = await fetch('/login', {
@@ -627,35 +139,21 @@
                     currentUser = data.username;
                     loadDashboard(data);
                 } else {
-                    showMessage('login-message', data.message, 'error');
+                    document.getElementById('login-error').innerText = data.message;
                 }
             } catch (err) {
-                showMessage('login-message', 'Connection error. Please try again.', 'error');
-            } finally {
-                setLoading('login-btn', false);
+                console.error(err);
             }
         }
         // Register
         async function register() {
-            const username = document.getElementById('reg-user').value.trim();
+            const username = document.getElementById('reg-user').value;
             const password = document.getElementById('reg-pass').value;
 
             if (!username || !password) {
-                showMessage('register-message', 'Please fill in all fields', 'error');
+                document.getElementById('register-error').innerText = "Please fill all fields";
                 return;
             }
-
-            if (username.length < 3) {
-                showMessage('register-message', 'Username must be at least 3 characters', 'error');
-                return;
-            }
-
-            if (password.length < 4) {
-                showMessage('register-message', 'Password must be at least 4 characters', 'error');
-                return;
-            }
-
-            setLoading('register-btn', true);
 
             try {
                 const res = await fetch('/register', {
@@ -666,44 +164,37 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    showMessage('register-message', data.message, 'success');
+                    document.getElementById('register-success').innerText = data.message;
+                    document.getElementById('register-error').innerText = "";
                     // Auto-login after registration
                     setTimeout(() => {
                         document.getElementById('login-user').value = username;
                         document.getElementById('login-pass').value = password;
                         showTab('login');
                         login();
-                    }, 1500);
+                    }, 1000);
                 } else {
-                    showMessage('register-message', data.message, 'error');
+                    document.getElementById('register-error').innerText = data.message;
+                    document.getElementById('register-success').innerText = "";
                 }
             } catch (err) {
-                showMessage('register-message', 'Connection error. Please try again.', 'error');
-            } finally {
-                setLoading('register-btn', false);
+                console.error(err);
             }
         }
 
-        // Load Dashboard        function loadDashboard(userData) {
-            hideMessages();
+        // Load Dashboard
+        function loadDashboard(userData) {
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('dashboard-section').classList.remove('hidden');
             document.getElementById('current-username').innerText = userData.username;
             document.getElementById('new-username').value = userData.username;
             
-            const preview = document.getElementById('photo-preview');
-            const placeholder = document.getElementById('photo-placeholder');
-            
             if (userData.photo) {
-                preview.src = '/uploads/' + userData.photo + '?t=' + new Date().getTime();
-                preview.style.display = 'block';
-                placeholder.style.display = 'none';
-            } else {
-                preview.style.display = 'none';
-                placeholder.style.display = 'flex';
+                const img = document.getElementById('photo-preview');
+                img.src = '/uploads/' + userData.photo + '?t=' + new Date().getTime();
+                img.style.display = 'block';
             }
         }
-
         // Update Profile
         document.getElementById('update-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -711,7 +202,7 @@
             const formData = new FormData();
             formData.append('username', currentUser);
             
-            const newUsername = document.getElementById('new-username').value.trim();
+            const newUsername = document.getElementById('new-username').value;
             const newPassword = document.getElementById('new-password').value;
             
             if (newUsername && newUsername !== currentUser) {
@@ -726,30 +217,25 @@
                 formData.append('photo', fileInput.files[0]);
             }
 
-            setLoading('update-btn', true);
-
             try {
                 const res = await fetch('/update', {
                     method: 'POST',
                     body: formData
                 });
                 const data = await res.json();
+
                 if (data.success) {
-                    alert('✅ Profile updated successfully!');
+                    alert("Updated Successfully!");
                     if (newUsername) {
                         currentUser = newUsername;
                         document.getElementById('current-username').innerText = newUsername;
                     }
-                    document.getElementById('new-password').value = '';
-                    fileInput.value = '';
                     loadDashboard({ username: data.username, photo: data.photo });
                 } else {
-                    alert('❌ ' + data.message);
+                    alert(data.message);
                 }
             } catch (err) {
-                alert('❌ Connection error. Please try again.');
-            } finally {
-                setLoading('update-btn', false);
+                console.error(err);
             }
         });
 
@@ -757,49 +243,32 @@
         async function viewAllUsers() {
             document.getElementById('dashboard-section').classList.add('hidden');
             document.getElementById('all-users-section').classList.remove('hidden');
-            
-            try {
+                        try {
                 const res = await fetch('/users');
                 const users = await res.json();
                 const listDiv = document.getElementById('all-user-list');
-                
-                if (users.length === 0) {
-                    listDiv.innerHTML = '<div class="user-item"><div class="user-info"><span style="color: var(--text-secondary); font-size: 13px;">No users found</span></div></div>';
-                    return;
-                }
-                
-                listDiv.innerHTML = users.map(u => {
-                    const initial = u.username.charAt(0).toUpperCase();
-                    const canDelete = u.username !== currentUser;
-                    return `<div class="user-item">
-                        <div class="user-info">
-                            <div class="user-avatar">${initial}</div>
-                            <span class="user-name">${u.username}</span>
-                            ${u.hasPhoto ? '<span class="user-badge">📷</span>' : ''}
-                        </div>
-                        ${canDelete ? `<button class="btn btn-danger btn-small" onclick="deleteUser('${u.username}')">Delete</button>` : '<span style="font-size: 11px; color: var(--text-secondary);">Current User</span>'}
-                    </div>`;
-                }).join('');
+                listDiv.innerHTML = users.map(u => 
+                    `<div class="user-item">
+                        <span>${u.username} ${u.hasPhoto ? '📷' : ''}</span>
+                        ${u.username !== currentUser ? `<button class="danger" style="width:auto;padding:5px 10px;font-size:0.8em" onclick="deleteUser('${u.username}')">Delete</button>` : ''}
+                    </div>`
+                ).join('');
             } catch (err) {
-                document.getElementById('all-user-list').innerHTML = '<div class="user-item"><div class="user-info"><span style="color: var(--danger); font-size: 13px;">Error loading users</span></div></div>';
-            }        }
+                document.getElementById('all-user-list').innerText = 'Error loading users';
+            }
+        }
 
         // Delete User
         async function deleteUser(username) {
-            if (!confirm(`⚠️ Are you sure you want to delete user "${username}"? This cannot be undone.`)) return;
+            if (!confirm(`Delete user ${username}?`)) return;
             
             try {
                 const res = await fetch(`/user/${username}`, { method: 'DELETE' });
                 const data = await res.json();
-                
-                if (data.success) {
-                    alert('✅ ' + data.message);
-                    viewAllUsers();
-                } else {
-                    alert('❌ ' + data.message);
-                }
+                alert(data.message);
+                viewAllUsers();
             } catch (err) {
-                alert('❌ Connection error. Please try again.');
+                console.error(err);
             }
         }
 
@@ -811,31 +280,17 @@
 
         // Logout
         function logout() {
-            if (!confirm('Are you sure you want to sign out?')) return;
-            
             currentUser = null;
             document.getElementById('dashboard-section').classList.add('hidden');
             document.getElementById('all-users-section').classList.add('hidden');
             document.getElementById('auth-section').classList.remove('hidden');
             document.getElementById('login-user').value = '';
             document.getElementById('login-pass').value = '';
-            document.getElementById('new-username').value = '';
-            document.getElementById('new-password').value = '';
-            document.getElementById('new-photo').value = '';
-            hideMessages();
+            document.getElementById('login-error').innerText = '';
             loadUserList();
         }
 
-        // Enter key support for login
-        document.getElementById('login-pass').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') login();
-        });
-
-        document.getElementById('reg-pass').addEventListener('keypress', function(e) {            if (e.key === 'Enter') register();
-        });
-
         // Initialize
         loadUserList();
-    </script>
-</body>
+    </script></body>
 </html>
