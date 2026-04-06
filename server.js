@@ -33,7 +33,7 @@ let user = {
     username: "admin",
     password: "1234",
     photo: null,
-    message: "Welcome to my page!"
+    message: "Welcome to my glowing world! ✨"
 };
 
 // --- ROUTES ---
@@ -52,8 +52,8 @@ app.post('/login', (req, res) => {
     }
 });
 
-// 2. Get User Data
-app.get('/user', (req, res) => {
+// 2. Get Public User Data (Photo + Message only)
+app.get('/public', (req, res) => {
     res.json({
         username: user.username,
         photo: user.photo,
@@ -61,11 +61,20 @@ app.get('/user', (req, res) => {
     });
 });
 
-// 3. Update Username & Password
+// 3. Get Private User Data
+app.get('/user', (req, res) => {
+    res.json({
+        username: user.username,
+        password: user.password,
+        photo: user.photo,
+        message: user.message
+    });
+});
+
+// 4. Update Username & Password
 app.post('/update-credentials', (req, res) => {
     const { username, password, newUsername, newPassword } = req.body;
     
-    // Verify current password
     if (password !== user.password) {
         return res.status(401).json({ success: false, message: "Current password is incorrect" });
     }
@@ -80,28 +89,27 @@ app.post('/update-credentials', (req, res) => {
     });
 });
 
-// 4. Upload/Update Photo
+// 5. Upload/Update Photo
 app.post('/upload-photo', upload.single('photo'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ success: false, message: "No photo uploaded" });
     }
     
-    // Delete old photo if exists
     if (user.photo) {
-        try {
-            fs.unlinkSync(`./uploads/${user.photo}`);
+        try {            fs.unlinkSync(`./uploads/${user.photo}`);
         } catch(e) {}
     }
     
     user.photo = req.file.filename;
     
     res.json({ 
-        success: true,         message: "Photo uploaded!",
+        success: true, 
+        message: "Photo uploaded!",
         photo: user.photo
     });
 });
 
-// 5. Delete Photo
+// 6. Delete Photo
 app.delete('/delete-photo', (req, res) => {
     if (user.photo) {
         try {
@@ -113,7 +121,7 @@ app.delete('/delete-photo', (req, res) => {
     res.json({ success: true, message: "Photo deleted!" });
 });
 
-// 6. Update Message
+// 7. Update Message
 app.post('/update-message', (req, res) => {
     const { message } = req.body;
     user.message = message || '';
@@ -125,7 +133,7 @@ app.post('/update-message', (req, res) => {
     });
 });
 
-// 7. Delete Message
+// 8. Delete Message
 app.delete('/delete-message', (req, res) => {
     user.message = '';
     res.json({ success: true, message: "Message deleted!" });
