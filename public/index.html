@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Profile App</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 350px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .hidden { display: none; }
+        #photo-preview { width: 100%; height: 200px; object-fit: cover; background: #eee; margin-bottom: 10px; display: none; }
+        .error { color: red; font-size: 0.9em; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- LOGIN FORM -->
+        <div id="login-section">
+            <h2 style="text-align: center;">Login</h2>
+            <p class="error" id="login-error"></p>
+            <input type="text" id="login-user" placeholder="Username (default: admin)">
+            <input type="password" id="login-pass" placeholder="Password (default: 1234)">
+            <button onclick="login()">Open App</button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard-section" class="hidden">
+            <h2 style="text-align: center;">My Profile</h2>
+            
+            <img id="photo-preview" src="" alt="Profile Photo">
+            
+            <form id="update-form">
+                <input type="text" id="new-user" placeholder="New Username">
+                <input type="password" id="new-pass" placeholder="New Password">
+                <label for="new-photo" style="font-size: 0.9em; color: #666;">Update Photo:</label>
+                <input type="file" id="new-photo" accept="image/*">
+                <button type="submit">Save Changes</button>
+                <button type="button" onclick="logout()" style="background: #666; margin-top: 5px;">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- LOGIC ---
+
+        async function login() {            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+
+            try {
+                const res = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    loadDashboard();
+                } else {
+                    document.getElementById('login-error').innerText = data.message;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadDashboard() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+
+            // Fetch current user data
+            const res = await fetch('/user');
+            const data = await res.json();
+            
+            document.getElementById('new-user').value = data.username;
+            
+            if (data.photoUrl) {
+                const img = document.getElementById('photo-preview');
+                img.src = data.photoUrl + '?t=' + new Date().getTime(); // Cache buster
+                img.style.display = 'block';
+            }
+        }
+
+        document.getElementById('update-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('username', document.getElementById('new-user').value);
+            formData.append('password', document.getElementById('new-pass').value);
+            
+            const fileInput = document.getElementById('new-photo');
+            if (fileInput.files[0]) {
+                formData.append('photo', fileInput.files[0]);
+            }
+            await fetch('/update', {
+                method: 'POST',
+                body: formData
+            });
+
+            alert("Updated Successfully!");
+            loadDashboard(); // Refresh to show new photo
+        });
+
+        function logout() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
