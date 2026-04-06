@@ -5,13 +5,13 @@ const fs = require('fs');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Serves the HTML file
-app.use('/uploads', express.static('uploads')); // Serves the images
+app.use(express.static('public'));
+app.use('/uploads', express.static('uploads'));
 
 // Ensure uploads directory exists
 const uploadDir = './uploads';
@@ -19,58 +19,133 @@ if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir);
 }
 
-// Storage Engine for Photos
+// Storage Engine for Photos (unique filename per user)
 const storage = multer.diskStorage({
     destination: './uploads/',
     filename: function(req, file, cb){
-        cb(null, 'profile.jpg'); // Always overwrite with the name profile.jpg
+        const uniqueName = `${req.body.username || 'user'}_${Date.now()}${path.extname(file.originalname)}`;
+        cb(null, uniqueName);
     }
 });
 const upload = multer({ storage: storage });
 
-// --- MOCK DATABASE (In memory for simplicity) ---
-// In a real app, you would use MongoDB or SQL here.
-let user = {
-    username: "admin",
-    password: "1234", // In a real app, never store plain text passwords!
-    hasPhoto: false
-};
+// --- USER DATABASE (In memory) ---
+let users = [
+    { username: "admin", password: "1234", photo: null },
+    { username: "john", password: "pass123", photo: null },
+    { username: "sarah", password: "hello", photo: null }
+];
 
 // --- ROUTES ---
 
 // 1. Login Route
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
-    if (username === user.username && password === user.password) {
-        res.json({ success: true, message: "Login successful" });
+    const user = users.find(u => u.username === username && u.password === password);
+    
+    if (user) {
+        res.json({ 
+            success: true, 
+            message: "Login successful",
+            username: user.username,            photo: user.photo
+        });
     } else {
         res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 });
 
-// 2. Get Current User Data
-app.get('/user', (req, res) => {
-    res.json({
-        username: user.username,
-        photoUrl: user.hasPhoto ? '/uploads/profile.jpg' : null
+// 2. Register New User
+app.post('/register', (req, res) => {
+    const { username, password } = req.body;
+    
+    // Check if username already exists
+    const existingUser = users.find(u => u.username === username);
+    if (existingUser) {
+        return res.status(400).json({ success: false, message: "Username already exists" });
+    }
+    
+    // Create new user
+    users.push({
+        username: username,
+        password: password,
+        photo: null
+    });
+    
+    res.json({ success: true, message: "User registered successfully!" });
+});
+
+// 3. Get All Users (Admin feature)
+app.get('/users', (req, res) => {
+    // Return usernames only (not passwords for security)
+    const userList = users.map(u => ({ username: u.username, hasPhoto: !!u.photo }));
+    res.json(userList);
+});
+
+// 4. Update User Info (Photo + Credentials)
+app.post('/update', upload.single('photo'), (req, res) => {
+    const { username, password, newUsername, newPassword } = req.body;
+    
+    // Find the user
+    const userIndex = users.findIndex(u => u.username === username);
+    if (userIndex === -1) {
+        return res.status(404).json({ success: false, message: "User not found" });
+    }
+    
+    // Update credentials if provided
+    if (newUsername) {
+        // Check if new username is taken
+        const existingUser = users.find(u => u.username === newUsername && u.username !== username);
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "Username already taken" });        }
+        users[userIndex].username = newUsername;
+    }
+    
+    if (newPassword) {
+        users[userIndex].password = newPassword;
+    }
+    
+    // Update photo if uploaded
+    if (req.file) {
+        // Delete old photo if exists
+        if (users[userIndex].photo) {
+            try {
+                fs.unlinkSync(`./uploads/${users[userIndex].photo}`);
+            } catch(e) {}
+        }
+        users[userIndex].photo = req.file.filename;
+    }
+    
+    res.json({ 
+        success: true, 
+        message: "Profile updated!",
+        username: users[userIndex].username,
+        photo: users[userIndex].photo
     });
 });
 
-// 3. Update User Info (Photo + Credentials)
-app.post('/update', upload.single('photo'), (req, res) => {
-    const { username, password } = req.body;
+// 5. Delete User (Admin feature)
+app.delete('/user/:username', (req, res) => {
+    const { username } = req.params;
     
-    // Update text fields if provided
-    if (username) user.username = username;
-    if (password) user.password = password;
-    
-    // Check if a photo was uploaded
-    if (req.file) {
-        user.hasPhoto = true;
+    // Prevent deleting last user
+    if (users.length <= 1) {
+        return res.status(400).json({ success: false, message: "Cannot delete last user" });
     }
-
-    res.json({ success: true, message: "Profile updated!" });
-});
+    
+    const userIndex = users.findIndex(u => u.username === username);
+    if (userIndex === -1) {
+        return res.status(404).json({ success: false, message: "User not found" });
+    }
+    
+    // Delete photo file if exists
+    if (users[userIndex].photo) {
+        try {
+            fs.unlinkSync(`./uploads/${users[userIndex].photo}`);
+        } catch(e) {}
+    }
+    
+    users.splice(userIndex, 1);
+    res.json({ success: true, message: "User deleted" });});
 
 // Start Server
 app.listen(PORT, () => {
